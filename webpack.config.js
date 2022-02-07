@@ -28,6 +28,6 @@ module.exports = {
   },
   output: {
     filename: "index.js",
-    path: path.resolve(__dirname, "..", "server", "static"),
+    path: path.resolve(__dirname, "..", "server_11sem", "static"),
   },
 };
