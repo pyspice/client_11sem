@@ -6,6 +6,7 @@ import { Services } from "../utils/IoC/Services";
 import {
   ClientAction,
   RequestSender,
+  ServerState,
   ServerStateLabel,
 } from "../utils/RequestSender";
 import { WelcomePage } from "./WelcomePage";
@@ -24,7 +25,7 @@ export class Game extends React.Component {
   private contentRef = React.createRef<any>();
 
   componentDidMount() {
-    this.updateState();
+    this.fetchAndUpdateState();
   }
 
   render() {
@@ -41,7 +42,7 @@ export class Game extends React.Component {
         return (
           <WelcomePage
             ref={this.contentRef}
-            onStartGame={this.onStartNewRound}
+            onStartGame={this.onStartNewGame}
           />
         );
       case GameManagerState.ROUND_RUNNING:
@@ -63,15 +64,18 @@ export class Game extends React.Component {
         return (
           <TryAgainPage
             ref={this.contentRef}
-            onStartNewGame={this.onStartNewRound}
+            onStartNewGame={this.onStartNewGame}
           />
         );
     }
   }
 
-  private updateState = async () => {
+  private fetchAndUpdateState = async () => {
     const serverState = await this.requestSender.fetchState();
+    this.updateState(serverState);
+  };
 
+  private updateState = (serverState: ServerState) => {
     if (
       serverState.state === ServerStateLabel.ROUND_ENDED &&
       !serverState.wordsLeft
@@ -107,6 +111,16 @@ export class Game extends React.Component {
 
     if (wordsLeft) this.gameManager.endRound(word, action);
     else this.gameManager.endGame(word, action);
+  };
+
+  private onStartNewGame = async (words: string[], nAttempts: number) => {
+    const { word, attempts } = await this.requestSender.postAction({
+      action: ClientAction.START,
+      words,
+      attempts: nAttempts,
+    });
+
+    this.gameManager.startRound(word, attempts);
   };
 
   private onChangeState = () => {

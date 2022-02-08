@@ -14,6 +14,7 @@ export enum ServerStateLabel {
 }
 
 export enum ClientAction {
+  START = "START",
   TRY = "TRY",
   SURRENDER = "SURRENDER",
   NEXT_ROUND = "NEXT_ROUND",
@@ -30,6 +31,8 @@ export type ServerResponse = {
 export type ClientQuery = {
   action: ClientAction;
   letter?: string;
+  words?: string[];
+  attempts?: number;
 };
 
 @injectable()

@@ -4,9 +4,10 @@ import { ActionResult } from "../types";
 import { GameManager } from "../utils/GameManager";
 import { lazyInject } from "../utils/IoC/Container";
 import { Services } from "../utils/IoC/Services";
+import { DictLoader } from "./DictLoader";
 
 type TryAgainPageProps = {
-  onStartNewGame(): void;
+  onStartNewGame(words: string[], attempts: number): void;
 };
 
 @observer
@@ -19,9 +20,7 @@ export class TryAgainPage extends React.Component<TryAgainPageProps> {
       <div>
         {this.message}
         <p>Увы, слова закончились</p>
-        <button onClick={this.onStartNewGame}>
-          Перемешать и начать заново
-        </button>
+        <DictLoader onStartNewGame={this.onStartNewGame} />
       </div>
     );
   }
@@ -41,7 +40,7 @@ export class TryAgainPage extends React.Component<TryAgainPageProps> {
     );
   }
 
-  private onStartNewGame = () => {
-    this.props.onStartNewGame();
+  private onStartNewGame = (words: string[], attempts: number) => {
+    this.props.onStartNewGame(words, attempts);
   };
 }
