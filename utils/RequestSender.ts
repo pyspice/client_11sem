@@ -37,7 +37,7 @@ export type ClientQuery = {
 
 @injectable()
 export class RequestSender {
-  private readonly SERVER_URL = window.location.origin;
+  private readonly SERVER_URL = "http://secret-tundra-10553.herokuapp.com";
   private readonly STATE_ENDPOINT = `${this.SERVER_URL}/state`;
   private readonly ACTION_ENDPOINT = `${this.SERVER_URL}/action`;
 
