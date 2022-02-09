@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { action, computed, observable, reaction } from 'mobx';
+import { action, observable } from 'mobx';
 import { ServerResponse } from './RequestSender';
 import { ActionResult } from './ActionResult';
 
