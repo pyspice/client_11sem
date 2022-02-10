@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "inversify": "^6.0.1",
-    "inversify-inject-decorators": "^3.1.0",
     "mobx": "^6.3.13",
     "mobx-react": "^7.2.1",
     "react": "17.0.2",
@@ -24,7 +23,6 @@
     "@babel/runtime": "^7.12.5",
     "@react-native-community/eslint-config": "^2.0.0",
     "@types/inversify": "^2.0.33",
-    "@types/inversify-inject-decorators": "^2.0.0",
     "@types/jest": "^26.0.23",
     "@types/react-native": "^0.66.15",
     "@types/react-test-renderer": "^17.0.1",
