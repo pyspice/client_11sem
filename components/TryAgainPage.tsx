@@ -1,27 +1,23 @@
-import { observer } from "mobx-react";
-import * as React from "react";
-import { ActionResult } from "../utils/ActionResult";
-import { GameManager } from "../utils/GameManager";
-import { lazyInject } from "../utils/IoC/Container";
-import { Services } from "../utils/IoC/Services";
-import { DictLoader } from "./DictLoader";
-
-type TryAgainPageProps = {
-  onStartNewGame(words: string[], attempts: number): void;
-};
+import { observer } from 'mobx-react';
+import * as React from 'react';
+import { Text, View } from 'react-native';
+import { ActionResult } from '../utils/ActionResult';
+import { GameManager } from '../utils/GameManager';
+import { container } from '../utils/IoC/Container';
+import { Services } from '../utils/IoC/Services';
 
 @observer
-export class TryAgainPage extends React.Component<TryAgainPageProps> {
-  @lazyInject(Services.GameManager)
-  private readonly gameManager: GameManager;
+export class TryAgainPage extends React.Component {
+  private readonly gameManager = container.get<GameManager>(
+    Services.GameManager,
+  );
 
   render() {
     return (
-      <div>
+      <View>
         {this.message}
-        <p>Увы, слова закончились</p>
-        <DictLoader onStartNewGame={this.onStartNewGame} />
-      </div>
+        <Text>Увы, слова закончились</Text>
+      </View>
     );
   }
 
@@ -31,16 +27,12 @@ export class TryAgainPage extends React.Component<TryAgainPageProps> {
 
     const message =
       lastActionResult === ActionResult.LOOSE
-        ? "К сожалению, вы проиграли."
-        : "Поздравляем, вы отгадали.";
+        ? 'К сожалению, вы проиграли.'
+        : 'Поздравляем, вы отгадали.';
     return (
-      <p>
+      <Text>
         {message} Слово: {currentMask}
-      </p>
+      </Text>
     );
   }
-
-  private onStartNewGame = (words: string[], attempts: number) => {
-    this.props.onStartNewGame(words, attempts);
-  };
 }

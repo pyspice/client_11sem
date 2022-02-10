@@ -1,9 +1,10 @@
-import { observer } from "mobx-react";
-import * as React from "react";
-import { ActionResult } from "../utils/ActionResult";
-import { GameManager } from "../utils/GameManager";
-import { lazyInject } from "../utils/IoC/Container";
-import { Services } from "../utils/IoC/Services";
+import { observer } from 'mobx-react';
+import * as React from 'react';
+import { Button, Text, View } from 'react-native';
+import { ActionResult } from '../utils/ActionResult';
+import { GameManager } from '../utils/GameManager';
+import { container } from '../utils/IoC/Container';
+import { Services } from '../utils/IoC/Services';
 
 type RoundEndProps = {
   onStartNewRound(): void;
@@ -11,30 +12,31 @@ type RoundEndProps = {
 
 @observer
 export class RoundEnd extends React.Component<RoundEndProps> {
-  @lazyInject(Services.GameManager)
-  private readonly gameManager: GameManager;
+  private readonly gameManager = container.get<GameManager>(
+    Services.GameManager,
+  );
 
   render() {
     return (
-      <div>
+      <View>
         {this.message}
-        <button onClick={this.onStartNewRound}>Следующий раунд</button>
-      </div>
+        <Button title="Следующий раунд" onPress={this.onStartNewRound} />
+      </View>
     );
   }
 
   private get message() {
     const { currentMask, lastActionResult } = this.gameManager;
-    if (!lastActionResult) return <div>Поиграем еще?</div>;
+    if (!lastActionResult) return <Text>Поиграем еще?</Text>;
 
     const message =
       lastActionResult === ActionResult.LOOSE
-        ? "К сожалению, вы проиграли."
-        : "Поздравляем, вы отгадали.";
+        ? 'К сожалению, вы проиграли.'
+        : 'Поздравляем, вы отгадали.';
     return (
-      <div>
+      <Text>
         {message} Слово: {currentMask}
-      </div>
+      </Text>
     );
   }
 

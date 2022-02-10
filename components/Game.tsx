@@ -1,43 +1,45 @@
-import * as React from "react";
-import { observer } from "mobx-react";
-import { GameManager, GameManagerState } from "../utils/GameManager";
-import { lazyInject } from "../utils/IoC/Container";
-import { Services } from "../utils/IoC/Services";
+import * as React from 'react';
+import { observer } from 'mobx-react';
+import { GameManager, GameManagerState } from '../utils/GameManager';
+import { container } from '../utils/IoC/Container';
+import { Services } from '../utils/IoC/Services';
 import {
   ClientAction,
   RequestSender,
   ServerState,
   ServerStateLabel,
-} from "../utils/RequestSender";
-import { WelcomePage } from "./WelcomePage";
-import { Round } from "./Round";
-import { RoundEnd } from "./RoundEnd";
-import { TryAgainPage } from "./TryAgainPage";
+} from '../utils/RequestSender';
+import { WelcomePage } from './WelcomePage';
+import { Round } from './Round';
+import { RoundEnd } from './RoundEnd';
+import { TryAgainPage } from './TryAgainPage';
+import { Text, View } from 'react-native';
 
 @observer
 export class Game extends React.Component {
-  @lazyInject(Services.GameManager)
-  private readonly gameManager: GameManager;
-
-  @lazyInject(Services.RequestSender)
-  private readonly requestSender: RequestSender;
+  private readonly gameManager = container.get<GameManager>(
+    Services.GameManager,
+  );
+  private readonly requestSender = container.get<RequestSender>(
+    Services.RequestSender,
+  );
 
   componentDidMount() {
     this.fetchAndUpdateState();
   }
 
   render() {
-    return <div>{this.content}</div>;
+    return <View>{this.content}</View>;
   }
 
   private get content() {
     if (!this.gameManager.wasInited) {
-      return "Now loading...";
+      return <Text>Now loading...</Text>;
     }
 
     switch (this.gameManager.state) {
       case GameManagerState.BEFORE_START:
-        return <WelcomePage onStartGame={this.onStartNewGame} />;
+        return <WelcomePage />;
       case GameManagerState.ROUND_RUNNING:
         return (
           <Round
@@ -48,7 +50,7 @@ export class Game extends React.Component {
       case GameManagerState.ROUND_ENDED:
         return <RoundEnd onStartNewRound={this.onStartNewRound} />;
       case GameManagerState.AFTER_END:
-        return <TryAgainPage onStartNewGame={this.onStartNewGame} />;
+        return <TryAgainPage />;
     }
   }
 
@@ -93,15 +95,5 @@ export class Game extends React.Component {
 
     if (wordsLeft) this.gameManager.endRound(word, action);
     else this.gameManager.endGame(word, action);
-  };
-
-  private onStartNewGame = async (words: string[], nAttempts: number) => {
-    const { word, attempts } = await this.requestSender.postAction({
-      action: ClientAction.START,
-      words,
-      attempts: nAttempts,
-    });
-
-    this.gameManager.startRound(word, attempts);
   };
 }

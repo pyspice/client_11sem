@@ -1,10 +1,11 @@
-import { action, observable } from "mobx";
-import { observer } from "mobx-react";
-import * as React from "react";
-import { ActionResult } from "../utils/ActionResult";
-import { GameManager } from "../utils/GameManager";
-import { lazyInject } from "../utils/IoC/Container";
-import { Services } from "../utils/IoC/Services";
+import { action, observable } from 'mobx';
+import { observer } from 'mobx-react';
+import * as React from 'react';
+import { Button, Text, TextInput, View } from 'react-native';
+import { ActionResult } from '../utils/ActionResult';
+import { GameManager } from '../utils/GameManager';
+import { container } from '../utils/IoC/Container';
+import { Services } from '../utils/IoC/Services';
 
 type RoundProps = {
   onTryLetter(letter: string): void;
@@ -13,34 +14,34 @@ type RoundProps = {
 
 @observer
 export class Round extends React.Component<RoundProps> {
-  private letter = observable.box<string>("");
+  private letter = observable.box<string>('');
 
-  @lazyInject(Services.GameManager)
-  private readonly gameManager: GameManager;
+  private readonly gameManager = container.get<GameManager>(
+    Services.GameManager,
+  );
 
   render() {
     const letter = this.letter.get();
     return (
-      <div>
-        <div>Текущая маска: {this.gameManager.currentMask}</div>
+      <View>
+        <Text>Текущая маска: {this.gameManager.currentMask}</Text>
         {this.lastActionMsg}
-        <div>Попыток осталось: {this.gameManager.attemptsLeft}</div>
-        <input
-          type="text"
+        <Text>Попыток осталось: {this.gameManager.attemptsLeft}</Text>
+        <TextInput
           value={letter}
           maxLength={1}
-          onChange={this.onChange}
+          onChangeText={this.onChange}
           autoFocus
-          onKeyPress={this.onKeyPress}
+          placeholder="Введите букву"
+          onEndEditing={this.onEndEditing}
         />
-        <button
-          onClick={this.onTryLetter}
+        <Button
+          title="Отправить"
+          onPress={this.onTryLetter}
           disabled={letter.length < 1}
-        >
-          Отправить
-        </button>
-        <button onClick={this.onSurrender}>Сдаться</button>
-      </div>
+        />
+        <Button title="Сдаться" onPress={this.onSurrender} />
+      </View>
     );
   }
 
@@ -48,38 +49,37 @@ export class Round extends React.Component<RoundProps> {
     const { lastActionResult } = this.gameManager;
     if (lastActionResult == undefined) return null;
 
-    let msg = "";
+    let msg = '';
     switch (lastActionResult) {
       case ActionResult.FAIL:
-        msg = "Не угадали. Попробуйте еще раз!";
+        msg = 'Не угадали. Попробуйте еще раз!';
         break;
 
       case ActionResult.OK:
-        msg = "Верно! Так держать!";
+        msg = 'Верно! Так держать!';
         break;
 
       case ActionResult.USED:
-        msg = "Внимательнее! Эта буква уже была.";
+        msg = 'Внимательнее! Эта буква уже была.';
     }
-    return <div>{msg}</div>;
+    return <Text>{msg}</Text>;
   }
-
-  private onKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" && this.letter.get().length > 0) {
+  
+  private onEndEditing = () => {
+    if (this.letter.get().length > 0) {
       this.onTryLetter();
     }
   };
 
   @action
-  private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const letter = event.target.value;
+  private onChange = (letter: string) => {
     if (letter && !letter.match(/[а-яА-ЯёЁ]/g)) return;
-    this.letter.set(event.target.value);
+    this.letter.set(letter);
   };
 
   private onTryLetter = () => {
     this.props.onTryLetter(this.letter.get());
-    this.letter.set("");
+    this.letter.set('');
   };
 
   private onSurrender = () => {

@@ -31,8 +31,6 @@ export type ServerResponse = {
 export type ClientQuery = {
   action: ClientAction;
   letter?: string;
-  words?: string[];
-  attempts?: number;
 };
 
 @injectable()
