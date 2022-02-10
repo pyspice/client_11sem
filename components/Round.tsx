@@ -1,3 +1,5 @@
+import { action, observable } from "mobx";
+import { observer } from "mobx-react";
 import * as React from "react";
 import { ActionResult } from "../utils/ActionResult";
 import { GameManager } from "../utils/GameManager";
@@ -9,19 +11,15 @@ type RoundProps = {
   onSurrender(): void;
 };
 
-type RoundState = {
-  letter: string;
-};
-
-export class Round extends React.Component<RoundProps, RoundState> {
-  state = {
-    letter: "",
-  };
+@observer
+export class Round extends React.Component<RoundProps> {
+  private letter = observable.box<string>("");
 
   @lazyInject(Services.GameManager)
   private readonly gameManager: GameManager;
 
   render() {
+    const letter = this.letter.get();
     return (
       <div>
         <div>Текущая маска: {this.gameManager.currentMask}</div>
@@ -29,7 +27,7 @@ export class Round extends React.Component<RoundProps, RoundState> {
         <div>Попыток осталось: {this.gameManager.attemptsLeft}</div>
         <input
           type="text"
-          value={this.state.letter}
+          value={letter}
           maxLength={1}
           onChange={this.onChange}
           autoFocus
@@ -37,7 +35,7 @@ export class Round extends React.Component<RoundProps, RoundState> {
         />
         <button
           onClick={this.onTryLetter}
-          disabled={this.state.letter.length < 1}
+          disabled={letter.length < 1}
         >
           Отправить
         </button>
@@ -67,20 +65,21 @@ export class Round extends React.Component<RoundProps, RoundState> {
   }
 
   private onKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" && this.state.letter.length > 0) {
+    if (event.key === "Enter" && this.letter.get().length > 0) {
       this.onTryLetter();
     }
   };
 
+  @action
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const letter = event.target.value;
     if (letter && !letter.match(/[а-яА-ЯёЁ]/g)) return;
-    this.setState({ letter: event.target.value });
+    this.letter.set(event.target.value);
   };
 
   private onTryLetter = () => {
-    this.props.onTryLetter(this.state.letter);
-    this.setState({ letter: "" });
+    this.props.onTryLetter(this.letter.get());
+    this.letter.set("");
   };
 
   private onSurrender = () => {

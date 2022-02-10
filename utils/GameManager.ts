@@ -19,25 +19,15 @@ type InnerState = {
 
 @injectable()
 export class GameManager {
-  // hot-fix workaround bingo
-  private onChangeState: (state: InnerState) => void;
-
-  @observable private _state: InnerState = {
+  private _state = observable.object<InnerState>({
     state: undefined,
-  };
+  });
 
   @action
-  init(
-    state: GameManagerState,
-    currentMask?: string,
-    attemptsLeft?: number,
-    onChangeState?: (state: InnerState) => void,
-  ) {
+  init(state: GameManagerState, currentMask?: string, attemptsLeft?: number) {
     this._state.state = state;
     this._state.currentMask = currentMask;
     this._state.attemptsLeft = attemptsLeft;
-    this.onChangeState = onChangeState;
-    this.signal();
   }
 
   @action
@@ -45,13 +35,11 @@ export class GameManager {
     this._state.state = GameManagerState.ROUND_RUNNING;
     this._state.currentMask = mask;
     this._state.attemptsLeft = attempts;
-    this.signal();
   }
 
   @action
   setLastActionResult(actionResult: ActionResult) {
     this._state.lastActionResult = actionResult;
-    this.signal();
   }
 
   @action
@@ -59,7 +47,6 @@ export class GameManager {
     this._state.state = GameManagerState.ROUND_ENDED;
     this._state.currentMask = word;
     this._state.lastActionResult = action;
-    this.signal();
   }
 
   @action
@@ -83,7 +70,6 @@ export class GameManager {
         else this.endGame(word, action);
         return;
     }
-    this.signal();
   }
 
   @action
@@ -91,7 +77,6 @@ export class GameManager {
     this._state.state = GameManagerState.AFTER_END;
     if (word) this._state.currentMask = word;
     if (action) this._state.lastActionResult = action;
-    this.signal();
   }
 
   get state() {
@@ -113,8 +98,4 @@ export class GameManager {
   get wasInited() {
     return this._state.state !== undefined;
   }
-
-  private signal = () => {
-    this.onChangeState(this._state);
-  };
 }

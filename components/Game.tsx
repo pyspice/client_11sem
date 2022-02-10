@@ -22,8 +22,6 @@ export class Game extends React.Component {
   @lazyInject(Services.RequestSender)
   private readonly requestSender: RequestSender;
 
-  private contentRef = React.createRef<any>();
-
   componentDidMount() {
     this.fetchAndUpdateState();
   }
@@ -39,34 +37,18 @@ export class Game extends React.Component {
 
     switch (this.gameManager.state) {
       case GameManagerState.BEFORE_START:
-        return (
-          <WelcomePage
-            ref={this.contentRef}
-            onStartGame={this.onStartNewGame}
-          />
-        );
+        return <WelcomePage onStartGame={this.onStartNewGame} />;
       case GameManagerState.ROUND_RUNNING:
         return (
           <Round
-            ref={this.contentRef}
             onTryLetter={this.onTryLetter}
             onSurrender={this.onSurrender}
           />
         );
       case GameManagerState.ROUND_ENDED:
-        return (
-          <RoundEnd
-            ref={this.contentRef}
-            onStartNewRound={this.onStartNewRound}
-          />
-        );
+        return <RoundEnd onStartNewRound={this.onStartNewRound} />;
       case GameManagerState.AFTER_END:
-        return (
-          <TryAgainPage
-            ref={this.contentRef}
-            onStartNewGame={this.onStartNewGame}
-          />
-        );
+        return <TryAgainPage onStartNewGame={this.onStartNewGame} />;
     }
   }
 
@@ -85,7 +67,7 @@ export class Game extends React.Component {
     }
 
     const { state, word, attempts } = serverState;
-    this.gameManager.init(state as any, word, attempts, this.onChangeState);
+    this.gameManager.init(state as any, word, attempts);
   };
 
   private onStartNewRound = async () => {
@@ -121,10 +103,5 @@ export class Game extends React.Component {
     });
 
     this.gameManager.startRound(word, attempts);
-  };
-
-  private onChangeState = () => {
-    this.contentRef.current?.forceUpdate();
-    this.forceUpdate();
   };
 }
